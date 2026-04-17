@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LexForge — AI Legal Research for Indian Advocates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ── */
+:root{
+  --navy:#07090F;--navy-1:#0B1423;--navy-2:#0F1E36;
+  --gold:#C18021;--gold-b:#E8A830;--gold-p:#F5D080;
+  --cream:#F4F1EA;--taupe:#B8A87A;--muted:#4A5260;
+  --red:#C0392B;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+  --body:'Libre Baskerville',Georgia,serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--cream);font-family:var(--body);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;top:0;left:0;z-index:9999;width:10px;height:10px;border-radius:50%;background:var(--gold);pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 18px rgba(193,128,33,.7);mix-blend-mode:screen}
+#cur-r{position:fixed;top:0;left:0;z-index:9998;width:40px;height:40px;border-radius:50%;border:1px solid rgba(193,128,33,.3);pointer-events:none;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s}
+body:has(a:hover,button:hover,[data-h]:hover) #cur{transform:translate(-50%,-50%) scale(2.4)}
+body:has(a:hover,button:hover) #cur-r{width:58px;height:58px;border-color:var(--gold)}
+
+/* NAV */
+nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:900;
+  background:rgba(7,9,15,.6);backdrop-filter:blur(28px) saturate(180%);
+  border:1px solid rgba(193,128,33,.2);border-radius:50px;
+  padding:9px 26px;display:flex;align-items:center;gap:28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.05);
+  transition:background .4s,border-color .4s}
+.nav-logo{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--cream);text-decoration:none;letter-spacing:.12em;text-transform:uppercase}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;gap:22px;list-style:none}
+.nav-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--taupe);text-decoration:none;transition:color .25s}
+.nav-links a:hover{color:var(--gold-b)}
+.nav-cta{padding:6px 18px;background:var(--gold);border:none;border-radius:50px;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);cursor:none;transition:all .3s;text-decoration:none}
+.nav-cta:hover{background:var(--gold-b);transform:translateY(-1px)}
+@media(max-width:760px){.nav-links{display:none}}
+
+/* HERO */
+#hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#sphere-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero-inner{position:relative;z-index:10;text-align:center;max-width:860px;padding:0 28px}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;animation:fUp .8s .3s ease forwards}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:36px;height:1px;background:rgba(193,128,33,.45)}
+h1.hero-h1{font-family:var(--serif);font-size:clamp(54px,9vw,120px);font-weight:300;line-height:.9;letter-spacing:-.015em;opacity:0;animation:fUp 1s .5s ease forwards}
+h1.hero-h1 .ital{font-style:italic;color:var(--gold-p)}
+h1.hero-h1 .blk{display:block;color:var(--cream)}
+.hero-sub{font-family:var(--serif);font-size:clamp(16px,2vw,21px);font-style:italic;color:rgba(244,241,234,.5);line-height:1.75;margin-top:26px;max-width:600px;margin-left:auto;margin-right:auto;opacity:0;animation:fUp .9s .75s ease forwards}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:42px;opacity:0;animation:fUp .9s .95s ease forwards}
+.btn-p{padding:14px 38px;background:var(--gold);border:none;border-radius:4px;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);cursor:none;box-shadow:0 4px 28px rgba(193,128,33,.45);transition:all .3s;text-decoration:none;overflow:hidden;position:relative}
+.btn-p::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:translateX(-100%);transition:transform .5s}
+.btn-p:hover::after{transform:translateX(100%)}
+.btn-p:hover{background:var(--gold-b);transform:translateY(-2px)}
+.btn-g{padding:13px 34px;background:transparent;border:1px solid rgba(244,241,234,.22);border-radius:4px;font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);cursor:none;transition:all .3s;text-decoration:none}
+.btn-g:hover{border-color:var(--gold);color:var(--gold-p)}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;letter-spacing:.44em;text-transform:uppercase;color:rgba(193,128,33,.32);animation:bounce 2.8s ease-in-out infinite;z-index:10}
+@keyframes bounce{0%,100%{opacity:.32;transform:translateX(-50%) translateY(0)}55%{opacity:.65;transform:translateX(-50%) translateY(9px)}}
+@keyframes fUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+/* MARQUEE */
+.mq-wrap{overflow:hidden;padding:13px 0;background:var(--gold)}
+.mq-track{display:inline-block;white-space:nowrap;animation:mq 28s linear infinite;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--navy)}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-item{display:inline-block;padding:0 26px}
+.mq-sep{opacity:.4}
+
+/* SECTION SHARED */
+.section{padding:120px 0}
+.W{max-width:1160px;margin:0 auto;padding:0 56px}
+@media(max-width:760px){.W{padding:0 22px}.section{padding:80px 0}}
+.kicker{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.kicker::after{content:'';width:32px;height:1px;background:rgba(193,128,33,.45)}
+.sec-h2{font-family:var(--serif);font-size:clamp(42px,5.5vw,76px);font-weight:300;line-height:.94;color:var(--cream)}
+.sec-h2 em{font-style:italic;color:var(--gold-p)}
+
+/* PAIN CARDS STACK */
+#problem{background:var(--navy);padding:100px 0 0}
+.prob-intro{max-width:1160px;margin:0 auto;padding:0 56px 72px}
+.stack-outer{position:relative;height:280vh}
+.stack-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center}
+.pain-deck{position:relative;width:600px;height:400px;max-width:90vw}
+.pain-card{
+  position:absolute;inset:0;
+  background:var(--navy-1);
+  border:1px solid rgba(193,128,33,.13);
+  border-radius:6px;
+  padding:48px;
+  box-shadow:0 28px 80px rgba(0,0,0,.65);
+  transform-origin:50% 100%;
+  will-change:transform,opacity;
+}
+.pain-card:nth-child(1){z-index:1;transform:translateY(52px) rotate(-2.2deg) scale(.91)}
+.pain-card:nth-child(2){z-index:2;transform:translateY(26px) rotate(-1.1deg) scale(.95)}
+.pain-card:nth-child(3){z-index:3;transform:translateY(0) rotate(0deg) scale(1)}
+.pain-n{position:absolute;top:18px;right:26px;font-family:var(--serif);font-size:76px;font-weight:700;color:rgba(193,128,33,.1);line-height:1}
+.pain-tag{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:inline-block;padding:3px 10px;background:rgba(193,128,33,.1);border:1px solid rgba(193,128,33,.2);border-radius:2px}
+.pain-title{font-family:var(--serif);font-size:32px;font-weight:400;color:var(--cream);line-height:1.2;margin-bottom:16px}
+@media(max-width:760px){.pain-title{font-size:22px}.pain-card{padding:32px}}
+.pain-body{font-family:var(--body);font-size:14.5px;font-style:italic;color:rgba(200,192,172,.58);line-height:1.9}
+.pain-fn{margin-top:22px;font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.08em}
+
+/* FEATURES */
+#features{background:var(--navy)}
+.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;margin-top:68px}
+@media(max-width:760px){.feat-grid{grid-template-columns:1fr}}
+.feat{position:relative;overflow:hidden;padding:48px 44px;min-height:300px;background:var(--navy-1);border:1px solid rgba(193,128,33,.08);transition:all .5s cubic-bezier(.23,1,.32,1);cursor:none}
+.feat::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--gold);transition:height .5s cubic-bezier(.23,1,.32,1)}
+.feat:hover{background:rgba(14,30,56,.9);border-color:rgba(193,128,33,.28)}
+.feat:hover::before{height:100%}
+.feat-glare{position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(193,128,33,.08),transparent 52%);opacity:0;transition:opacity .3s;pointer-events:none}
+.feat:hover .feat-glare{opacity:1}
+.feat-n{position:absolute;top:20px;right:24px;font-family:var(--serif);font-size:68px;font-weight:700;color:rgba(193,128,33,.07);line-height:1}
+.feat-icon{width:48px;height:48px;border:1px solid rgba(193,128,33,.22);display:flex;align-items:center;justify-content:center;margin-bottom:26px;font-family:var(--mono);font-size:17px;color:var(--gold);background:rgba(193,128,33,.06);transition:all .4s}
+.feat:hover .feat-icon{background:rgba(193,128,33,.14);border-color:var(--gold)}
+.feat-title{font-family:var(--serif);font-size:27px;font-weight:600;color:var(--cream);margin-bottom:12px;line-height:1.1}
+.feat-body{font-family:var(--body);font-size:14px;font-style:italic;color:rgba(200,192,172,.58);line-height:1.95}
+.feat:hover .feat-body{color:rgba(200,192,172,.8)}
+.feat-tag{margin-top:26px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(193,128,33,.45)}
+.feat:hover .feat-tag{color:var(--gold)}
+.feat.hl{border-color:rgba(193,128,33,.2);background:rgba(193,128,33,.04)}
+.feat.hl .feat-title{color:var(--gold-p)}
+.feat.hl .feat-body{color:rgba(200,192,172,.75)}
+.feat.hl .feat-tag{color:var(--gold)}
+.feat.hl .feat-icon{background:rgba(193,128,33,.15);border-color:var(--gold)}
+
+/* TECH */
+#tech{background:var(--navy-2);padding:100px 0}
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:60px}
+@media(max-width:760px){.tech-grid{grid-template-columns:1fr}}
+.tech-item{padding:40px 32px;background:var(--navy);border:1px solid rgba(193,128,33,.07);transition:all .4s}
+.tech-item:hover{background:rgba(11,20,35,.9);border-color:rgba(193,128,33,.2)}
+.tech-name{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--gold);letter-spacing:.09em;margin-bottom:9px}
+.tech-role{font-family:var(--body);font-size:14px;font-style:italic;color:rgba(200,192,172,.5);line-height:1.75}
+
+/* CTA */
+#cta{background:var(--navy);position:relative;overflow:hidden;padding:130px 56px;text-align:center}
+#cta::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(193,128,33,.09),transparent 65%);pointer-events:none}
+#cta::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.cta-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);margin-bottom:26px}
+.cta-h2{font-family:var(--serif);font-size:clamp(52px,8vw,106px);font-weight:300;line-height:.9;color:var(--cream);margin-bottom:26px;letter-spacing:-.02em}
+.cta-h2 em{font-style:italic;color:var(--gold-p)}
+.cta-sub{font-family:var(--body);font-size:17px;font-style:italic;color:rgba(200,192,172,.45);max-width:460px;margin:0 auto 46px;line-height:1.9}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta-disc{margin-top:42px;font-family:var(--mono);font-size:10.5px;color:rgba(200,192,172,.2);max-width:500px;margin-left:auto;margin-right:auto;line-height:1.9;letter-spacing:.02em}
+
+/* FOOTER */
+footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:26px 56px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.footer-logo{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--taupe);letter-spacing:.12em;text-transform:uppercase}
+.footer-logo span{color:var(--gold)}
+.foot-copy{font-family:var(--mono);font-size:10.5px;color:rgba(200,192,172,.2);letter-spacing:.07em;text-transform:uppercase}
+
+/* GRAIN */
+.grain{position:fixed;inset:0;z-index:9990;pointer-events:none;opacity:.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+.rv.on{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+::selection{background:rgba(193,128,33,.22);color:var(--cream)}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a class="nav-logo" href="#">Lex<span>·</span>Forge</a>
+  <ul class="nav-links">
+    <li><a href="#problem">The Problem</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#tech">Stack</a></li>
+  </ul>
+  <a class="nav-cta" href="#features">See Features</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="sphere-canvas"></canvas>
+  <div class="hero-inner">
+    <!-- <div class="hero-eyebrow">VibeCon 2026 &mdash; Polaris × Emergent × Y Combinator</div> -->
+    <h1 class="hero-h1">
+      <span class="ital">Your argument</span>
+      <span class="blk">has enemies.</span>
+    </h1>
+    <p class="hero-sub">LexForge is an AI research platform for Indian advocates — that finds your weaknesses before the other side does.</p>
+    <div class="hero-btns">
+      <a class="btn-p" href="#features">Explore the Product &darr;</a>
+      <a class="btn-g" href="#features">See the Product</a>
+    </div>
+  </div>
+  <div class="scroll-hint">Scroll &darr;</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq-wrap">
+  <div class="mq-track">
+    <span class="mq-item">50 Million Pending Cases</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">Zero Should Be Because of a Bad Argument</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">Runs Locally &mdash; No Cloud, No Leaks</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">No Hallucinated Citations. Ever.</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">Built in Bangalore. For Indian Courts.</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">50 Million Pending Cases</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">Zero Should Be Because of a Bad Argument</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">Runs Locally &mdash; No Cloud, No Leaks</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">No Hallucinated Citations. Ever.</span><span class="mq-item mq-sep">&mdash;</span>
+    <span class="mq-item">Built in Bangalore. For Indian Courts.</span><span class="mq-item mq-sep">&mdash;</span>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="prob-intro">
+    <div class="kicker rv">The Problem</div>
+    <h2 class="sec-h2 rv">Three things that kill a case<br/><em>before it starts.</em></h2>
+  </div>
+  <div class="stack-outer">
+    <div class="stack-sticky">
+      <div class="pain-deck" id="pain-deck">
+        <div class="pain-card" id="pc1">
+          <div class="pain-n">01</div>
+          <div class="pain-tag">Research Hell</div>
+          <h3 class="pain-title">Lawyers spend 60% of prep time on research. The other 40% on worrying about the research.</h3>
+          <p class="pain-body">4.5 million judgments on Indian Kanoon. None of them organised for you. A senior advocate spends more time Ctrl+F-ing PDFs than actually building the argument. The backlog isn't just in courts — it's in preparation.</p>
+          <div class="pain-fn">&rarr; LexForge searches 4.5M judgments. Returns cited answers, not links.</div>
+        </div>
+        <div class="pain-card" id="pc2">
+          <div class="pain-n">02</div>
+          <div class="pain-tag">The Hallucination Problem</div>
+          <h3 class="pain-title">ChatGPT cited a Supreme Court judge who doesn't exist. He was thrilled.</h3>
+          <p class="pain-body">Lawyers have already been sanctioned internationally for citing AI-fabricated cases in actual filings. One bad citation = destroyed credibility = mistrial potential. LexForge only cites what it can retrieve. When it can't find something, it says so. Radical honesty.</p>
+          <div class="pain-fn">&rarr; Every citation flagged. Every source linked. "No direct authority" is a valid answer.</div>
+        </div>
+        <div class="pain-card" id="pc3">
+          <div class="pain-n">03</div>
+          <div class="pain-tag">The Privacy Disaster</div>
+          <h3 class="pain-title">Attorney-client privilege. ChatGPT's terms of service. Pick one.</h3>
+          <p class="pain-body">Uploading your client's matter to any cloud AI is a Bar Council violation waiting to be discovered. LexForge runs on your machine via Ollama. The model doesn't phone home. Your client's case stays in your office — not in a server farm in Oregon.</p>
+          <div class="pain-fn">&rarr; Local qwen3:8b. ChromaDB. Air-gapped if needed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="section" style="padding-top:60px">
+  <div class="W">
+    <div class="kicker rv">The Four Instruments</div>
+    <h2 class="sec-h2 rv">From first research<br/><em>to final argument.</em></h2>
+    <div class="feat-grid rv">
+
+      <div class="feat" data-h>
+        <div class="feat-glare"></div>
+        <div class="feat-n">01</div>
+        <div class="feat-icon">R</div>
+        <h3 class="feat-title">Research Mode</h3>
+        <p class="feat-body">Search uploaded judgments and live cases from Indian Kanoon, SCI, and eCourts simultaneously. Binding vs persuasive authority — separated, not shuffled. A cited answer at 2am, not a list of links.</p>
+        <div class="feat-tag">SC &middot; HC &middot; Tribunal &middot; Live &middot; Constitution</div>
+      </div>
+
+      <div class="feat" data-h>
+        <div class="feat-glare"></div>
+        <div class="feat-n">02</div>
+        <div class="feat-icon">A</div>
+        <h3 class="feat-title">Argument Builder</h3>
+        <p class="feat-body">Enter your case facts in plain language. LexForge identifies legal issues, retrieves authorities, and generates a complete IRAC brief — fully cited, with adverse cases distinguished — in under ten minutes.</p>
+        <div class="feat-tag">IRAC &middot; Auto-cited &middot; Section-mapped &middot; Fast</div>
+      </div>
+
+      <div class="feat hl" data-h>
+        <div class="feat-glare"></div>
+        <div class="feat-n">03</div>
+        <div class="feat-icon">D</div>
+        <h3 class="feat-title">Devil's Advocate</h3>
+        <p class="feat-body">The main act. LexForge plays opposing senior counsel AND simulates bench questions from five judge personas. It tears your argument apart — logically, sometimes brutally, occasionally with a sense of humour — so the other side can't.</p>
+        <div class="feat-tag">Adversarial &middot; Bench simulation &middot; Priority actions &middot; Local AI</div>
+      </div>
+
+      <div class="feat" data-h>
+        <div class="feat-glare"></div>
+        <div class="feat-n">04</div>
+        <div class="feat-icon">M</div>
+        <h3 class="feat-title">Moot Court</h3>
+        <p class="feat-body">Full adversarial simulation: Opening Submissions, Rebuttal, Sur-Rebuttal, Judicial Observations. Walk into the courtroom having already lost twice and rebuilt. The third time you walk in confident.</p>
+        <div class="feat-tag">2 rounds &middot; 5 bench personas &middot; Judicial observations</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section id="tech">
+  <div class="W">
+    <div class="kicker rv">Under the Hood</div>
+    <h2 class="sec-h2 rv">Technical credibility<br/><em>matters in court.</em></h2>
+    <div class="tech-grid rv">
+      <div class="tech-item"><div class="tech-name">qwen3:8b via Ollama</div><div class="tech-role">Local reasoning LLM. Runs on-device. No API keys, no data leaves the machine.</div></div>
+      <div class="tech-item"><div class="tech-name">ChromaDB + nomic-embed-text</div><div class="tech-role">Vector store for uploaded judgments. Hybrid legal-structure chunking. Relevance scoring visible to the advocate — nothing hidden.</div></div>
+      <div class="tech-item"><div class="tech-name">Indian Kanoon + SCI + eCourts</div><div class="tech-role">Live precedent search across millions of judgments. Five-source retrieval stack. Constitutional index for instant provision lookup.</div></div>
+      <div class="tech-item"><div class="tech-name">FastAPI + SQLite</div><div class="tech-role">Research results and simulations auto-saved. Session history under briefs. PDF export. Runs locally on port 8000.</div></div>
+      <div class="tech-item"><div class="tech-name">RAG with Citation Discipline</div><div class="tech-role">Every proposition must cite [SOURCE N]. Model instructed to write "No direct authority found" rather than fabricate. Honesty as a feature.</div></div>
+      <div class="tech-item"><div class="tech-name">Five Judge Personas</div><div class="tech-role">Strict Proceduralist, Rights-Oriented, Commercial, Criminal, Constitutional. Each changes how arguments are attacked and what bench questions surface.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div style="position:relative;z-index:1">
+    <div class="cta-label">Ready?</div>
+    <h2 class="cta-h2">Research smarter.<br/><em>Argue better.</em></h2>
+    <p class="cta-sub">Your client's matter never leaves your machine.</p>
+    <div class="cta-btns">
+      <a class="btn-p" href="#features">Explore Features</a>
+      <a class="btn-g" href="#features">See All Features &rarr;</a>
+    </div>
+    <div class="cta-disc">LexForge is a research and preparation tool. It does not constitute legal advice and does not replace professional judgment. Verify all citations independently before filing.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Lex<span>·</span>Forge</div>
+  <!-- <div class="foot-copy">VibeCon 2026 &middot; Polaris School of Technology</div> -->
+  <div class="foot-copy">Local AI &middot; Indian Courts &middot; Zero Cloud</div>
+</footer>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ═══ CURSOR ═══ */
+const CUR=document.getElementById('cur'),CURR=document.getElementById('cur-r');
+let tx=0,ty=0,cx=0,cy=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY});
+(function loop(){
+  cx+=(tx-cx)*.2; cy+=(ty-cy)*.2;
+  rx+=(tx-rx)*.07; ry+=(ty-ry)*.07;
+  CUR.style.left=cx+'px'; CUR.style.top=cy+'px';
+  CURR.style.left=rx+'px'; CURR.style.top=ry+'px';
+  requestAnimationFrame(loop);
+})();
+
+/* ═══ SPHERE ═══ */
+(function(){
+  const canvas=document.getElementById('sphere-canvas');
+  if(!canvas||typeof THREE==='undefined') return;
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,2000);
+  camera.position.z=480;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const TERMS=['Stare Decisis','Habeas Corpus','Ratio Decidendi','Obiter Dicta','Mandamus',
+    'Certiorari','Quo Warranto','Res Judicata','Locus Standi','Audi Alteram',
+    'Mens Rea','Actus Reus','Article 21','Article 14','Article 32',
+    'Prima Facie','Ultra Vires','Lex Loci','Ex Parte','Sub Judice',
+    'Due Process','Natural Justice','Basic Structure','Equal Protection',
+    'RAG','Qwen3:8B','ChromaDB','FastAPI','IRAC',
+    'LexForge','Indian Kanoon','Supreme Court','High Court','Advocate',
+    'Proportionality','Writ Petition','Legal Research','Precedent','Justice'];
+  const group=new THREE.Group();
+  scene.add(group);
+  const N=TERMS.length,R=195;
+  TERMS.forEach((term,i)=>{
+    const phi=Math.acos(1-2*(i+.5)/N);
+    const theta=Math.PI*(1+Math.sqrt(5))*i;
+    const ox=R*Math.sin(phi)*Math.cos(theta);
+    const oy=R*Math.sin(phi)*Math.sin(theta);
+    const oz=R*Math.cos(phi);
+    const c=document.createElement('canvas');
+    c.width=256; c.height=54;
+    const ctx=c.getContext('2d');
+    const isMain=term==='LexForge';
+    ctx.font=isMain?'bold 21px Cormorant Garamond,serif':'13px IBM Plex Mono,monospace';
+    ctx.fillStyle=isMain?'#E8A830':'rgba(193,128,33,.62)';
+    ctx.textAlign='center';
+    ctx.fillText(term,128,34);
+    const tex=new THREE.CanvasTexture(c);
+    const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+    const spr=new THREE.Sprite(mat);
+    const sc=isMain?96:60;
+    spr.scale.set(sc,sc*54/256,1);
+    spr.position.set(ox,oy,oz);
+    group.add(spr);
+  });
+  let mX=0,mY=0,rotY=0,rotX=0,t=0;
+  document.addEventListener('mousemove',e=>{
+    mX=(e.clientX/innerWidth-.5)*2;
+    mY=(e.clientY/innerHeight-.5)*2;
+  });
+  function animate(){
+    requestAnimationFrame(animate);
+    t+=.003;
+    rotY+=(mX*.5+t-rotY)*.018;
+    rotX+=(mY*.18-rotX)*.018;
+    group.rotation.y=rotY;
+    group.rotation.x=rotX;
+    group.children.forEach(s=>{
+      const wp=new THREE.Vector3();
+      s.getWorldPosition(wp);
+      s.material.opacity=Math.max(.08,Math.min(1,(wp.z+R)/(R*1.7)));
+    });
+    renderer.render(scene,camera);
+  }
+  animate();
+  window.addEventListener('resize',()=>{
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+})();
+
+/* ═══ STACK SCROLL ═══ */
+function stackTick(){
+  const outer=document.querySelector('.stack-outer');
+  if(!outer) return;
+  const r=outer.getBoundingClientRect();
+  const total=outer.offsetHeight-innerHeight;
+  const prog=Math.max(0,Math.min(1,-r.top/total));
+  const p1=document.getElementById('pc1');
+  const p2=document.getElementById('pc2');
+  const p3=document.getElementById('pc3');
+  if(!p1) return;
+  const ph1=Math.max(0,Math.min(1,prog/0.35));
+  const ph2=Math.max(0,Math.min(1,(prog-0.33)/0.35));
+  p1.style.transform=`translateY(${52*(1-ph1)}px) rotate(${-2.2*(1-ph1)}deg) scale(${.91+.045*ph1})`;
+  p2.style.transform=`translateY(${26*(1-ph2)}px) rotate(${-1.1*(1-ph2)}deg) scale(${.95+.03*ph2})`;
+  p3.style.transform=`translateY(0) rotate(0deg) scale(1)`;
+  if(prog < 0.33){
+    p1.style.zIndex=3; p2.style.zIndex=2; p3.style.zIndex=1;
+  } else if(prog < 0.66){
+    p1.style.zIndex=1; p2.style.zIndex=3; p3.style.zIndex=2;
+  } else {
+    p1.style.zIndex=1; p2.style.zIndex=2; p3.style.zIndex=3;
+  }
+  p1.style.opacity=Math.max(.2,1-ph2*.65);
+  p2.style.opacity=Math.max(.45,1);
+}
+window.addEventListener('scroll',stackTick,{passive:true});
+stackTick();
+
+/* ═══ FEAT CARD HOVER ═══ */
+document.querySelectorAll('.feat').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=e.clientX-r.left,y=e.clientY-r.top;
+    const rx=((y-r.height/2)/r.height)*7;
+    const ry=(-((x-r.width/2)/r.width))*7;
+    card.style.transform=`perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(7px)`;
+    card.style.transition='transform .08s ease';
+    const g=card.querySelector('.feat-glare');
+    if(g){g.style.setProperty('--mx',x+'px');g.style.setProperty('--my',y+'px')}
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform='';
+    card.style.transition='transform .5s cubic-bezier(.23,1,.32,1)';
+  });
+});
+
+/* ═══ REVEAL ═══ */
+const rvObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting) e.target.classList.add('on')});
+},{threshold:.07,rootMargin:'0px 0px -36px 0px'});
+document.querySelectorAll('.rv').forEach(el=>rvObs.observe(el));
+
+/* ═══ NAV ═══ */
+window.addEventListener('scroll',()=>{
+  const n=document.getElementById('main-nav');
+  n.style.background=scrollY>80?'rgba(7,9,15,.92)':'rgba(7,9,15,.6)';
+  n.style.borderColor=scrollY>80?'rgba(193,128,33,.28)':'rgba(193,128,33,.2)';
+},{passive:true});
+
+
+</script>
+</body>
+</html>
