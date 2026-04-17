@@ -198,7 +198,7 @@ footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:2
       <span class="ital">Step into Court</span>
       <span class="blk">fully prepared</span>
     </h1>
-    <p class="hero-sub">LexForge is an AI research platform for Indian advocates — that finds your weaknesses before the other side does.</p>
+    <p class="hero-sub">LexForge is a platform for Indian advocates to Research Precedents, build arguments, test their arguments, and stimulate debates.</p>
     <div class="hero-btns">
       <a class="btn-p" href="#features">Explore the Product &darr;</a>
       <a class="btn-g" href="#features">See the Product</a>
@@ -242,14 +242,14 @@ footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:2
         <div class="pain-card" id="pc2">
           <div class="pain-n">02</div>
           <div class="pain-tag">The Hallucination Problem</div>
-          <h3 class="pain-title">ChatGPT cited a Supreme Court judge who doesn't exist. He was thrilled.</h3>
+          <h3 class="pain-title"> An AI Chatbot cited a Supreme Court judge who doesn't exist. He was thrilled.</h3>
           <p class="pain-body">Lawyers have already been sanctioned internationally for citing AI-fabricated cases in actual filings. One bad citation = destroyed credibility = mistrial potential. LexForge only cites what it can retrieve. When it can't find something, it says so. Radical honesty.</p>
           <div class="pain-fn">&rarr; Every citation flagged. Every source linked. "No direct authority" is a valid answer.</div>
         </div>
         <div class="pain-card" id="pc3">
           <div class="pain-n">03</div>
           <div class="pain-tag">The Privacy Disaster</div>
-          <h3 class="pain-title">Attorney-client privilege. ChatGPT's terms of service. Pick one.</h3>
+          <h3 class="pain-title">Attorney-client privilege.Pick one.</h3>
           <p class="pain-body">Uploading your client's matter to any cloud AI is a Bar Council violation waiting to be discovered. LexForge runs on your machine via Ollama. The model doesn't phone home. Your client's case stays in your office — not in a server farm in Oregon.</p>
           <div class="pain-fn">&rarr; Local qwen3:8b. ChromaDB. Air-gapped if needed.</div>
         </div>
@@ -270,7 +270,7 @@ footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:2
         <div class="feat-n">01</div>
         <div class="feat-icon">R</div>
         <h3 class="feat-title">Research Mode</h3>
-        <p class="feat-body">Search uploaded judgments and live cases from Indian Kanoon, SCI, and eCourts simultaneously. Binding vs persuasive authority — separated, not shuffled. A cited answer at 2am, not a list of links.</p>
+        <p class="feat-body">Search uploaded judgments and live cases from Indian Kanoon, SCI, and eCourts simultaneously. Binding vs persuasive authority — separated, not shuffled. A cited answer at 2 am, not a list of links.</p>
         <div class="feat-tag">SC &middot; HC &middot; Tribunal &middot; Live &middot; Constitution</div>
       </div>
 
@@ -288,7 +288,7 @@ footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:2
         <div class="feat-n">03</div>
         <div class="feat-icon">D</div>
         <h3 class="feat-title">Devil's Advocate</h3>
-        <p class="feat-body">The main act. LexForge plays opposing senior counsel AND simulates bench questions from five judge personas. It tears your argument apart — logically, sometimes brutally, occasionally with a sense of humour — so the other side can't.</p>
+        <p class="feat-body">The main act. LexForge plays opposing senior counsel AND tells weakness in your argument.</p>
         <div class="feat-tag">Adversarial &middot; Bench simulation &middot; Priority actions &middot; Local AI</div>
       </div>
 
@@ -297,7 +297,7 @@ footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:2
         <div class="feat-n">04</div>
         <div class="feat-icon">M</div>
         <h3 class="feat-title">Moot Court</h3>
-        <p class="feat-body">Full adversarial simulation: Opening Submissions, Rebuttal, Sur-Rebuttal, Judicial Observations. Walk into the courtroom having already lost twice and rebuilt. The third time you walk in confident.</p>
+        <p class="feat-body">Full adversarial simulation: Opening Submissions, Rebuttal, Sur-Rebuttal, Judicial Observations. Walk into the courtroom having already lost twice and rebuilt. The third time you walk in confidently.</p>
         <div class="feat-tag">2 rounds &middot; 5 bench personas &middot; Judicial observations</div>
       </div>
 
@@ -311,10 +311,10 @@ footer{background:var(--navy);border-top:1px solid rgba(193,128,33,.1);padding:2
     <div class="kicker rv">Under the Hood</div>
     <h2 class="sec-h2 rv">Technical credibility<br/><em>matters in court.</em></h2>
     <div class="tech-grid rv">
-      <div class="tech-item"><div class="tech-name">qwen3:8b via Ollama</div><div class="tech-role">Local reasoning LLM. Runs on-device. No API keys, no data leaves the machine.</div></div>
+      <div class="tech-item"><div class="tech-name">qwen3:8b via Ollama</div><div class="tech-role">Local reasoning LLM. Runs on-device. No data leaves the machine.</div></div>
       <div class="tech-item"><div class="tech-name">ChromaDB + nomic-embed-text</div><div class="tech-role">Vector store for uploaded judgments. Hybrid legal-structure chunking. Relevance scoring visible to the advocate — nothing hidden.</div></div>
       <div class="tech-item"><div class="tech-name">Indian Kanoon + SCI + eCourts</div><div class="tech-role">Live precedent search across millions of judgments. Five-source retrieval stack. Constitutional index for instant provision lookup.</div></div>
-      <div class="tech-item"><div class="tech-name">FastAPI + SQLite</div><div class="tech-role">Research results and simulations auto-saved. Session history under briefs. PDF export. Runs locally on port 8000.</div></div>
+      <div class="tech-item"><div class="tech-name">FastAPI + SQLite</div><div class="tech-role">Research results and simulations auto-saved. Session history under briefs. PDF export. Runs locally.</div></div>
       <div class="tech-item"><div class="tech-name">RAG with Citation Discipline</div><div class="tech-role">Every proposition must cite [SOURCE N]. Model instructed to write "No direct authority found" rather than fabricate. Honesty as a feature.</div></div>
       <div class="tech-item"><div class="tech-name">Five Judge Personas</div><div class="tech-role">Strict Proceduralist, Rights-Oriented, Commercial, Criminal, Constitutional. Each changes how arguments are attacked and what bench questions surface.</div></div>
     </div>
